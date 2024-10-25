@@ -19,3 +19,6 @@ Starting from Log4j2 `2.20.0` those test utilities were extracted in its own lib
 Check the commit https://github.com/apache/logging-log4j2/commit/d4a81ec0530a207b49931d0c92b34b58a3d91e8c.
 
 The class was also moved from `org.apache.logging.log4j.test.appender.ListAppender` to `org.apache.logging.log4j.core.test.appender.ListAppender`.
+
+Check https://github.com/andsel/log4j2_log_spy/blob/85790eeb7f1987b4107be0e7e2ccf39fc6f82b79/app/src/test/java/mocklog4j/ServiceTest.java#L46-L64 
+for a test example.
