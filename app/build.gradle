@@ -15,17 +15,25 @@ repositories {
     mavenCentral()
 }
 
+def log4jVersion = '2.24.1'
+//def log4jVersion = '2.17.2'
+
 dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation libs.junit.jupiter
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // this provide the org.apache.logging.log4j.test.appender.ListAppender
+//    testImplementation "org.apache.logging.log4j:log4j-core:${log4jVersion}:tests" // up to version 2.19.0
+    // starting from version 2.20.0 commit https://github.com/apache/logging-log4j2/commit/d4a81ec0530a207b49931d0c92b34b58a3d91e8c
+    // the test harness was separated into log4j-core-test from log4j-core and type tests
+    testImplementation "org.apache.logging.log4j:log4j-core-test:${log4jVersion}" // from version 2.20.0
 
     // This dependency is used by the application.
     implementation libs.guava
 
-    compileOnly 'org.apache.logging.log4j:log4j-api:2.24.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.24.1'
+    compileOnly "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+    implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
