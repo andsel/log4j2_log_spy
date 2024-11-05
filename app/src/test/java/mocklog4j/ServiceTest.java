@@ -1,6 +1,7 @@
 package mocklog4j;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -14,8 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ServiceTest {
 
@@ -61,6 +61,26 @@ class ServiceTest {
             assertNotNull(messages);
             String message = messages.iterator().next();
             assertTrue(message.contains("Action invoked"));
+        }
+    }
+
+    @Test
+    public void givenServiceInstancedInfoIsLoggedOnAnotherMethod() {
+        try (LoggerContext logCtx = Configurator.initialize(configuration)) {
+            // setup
+            final Configuration config = logCtx.getConfiguration();
+            ListAppender appender = config.getAppender("LOG_SPY");
+            assertNotNull(appender, "Can't find logs spy appender");
+
+            // exercise
+            Service sut = new Service();
+            sut.secondAction();
+
+            // verify
+            List<String> messages = appender.getMessages();
+            assertNotNull(messages);
+            String message = messages.iterator().next();
+            assertTrue(message.contains("Second action invoked"));
         }
     }
 }

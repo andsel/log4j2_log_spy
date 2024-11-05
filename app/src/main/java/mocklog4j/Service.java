@@ -9,4 +9,8 @@ public class Service {
     public void action() {
         LOGGER.info("Action invoked");
     }
+
+    public void secondAction() {
+        LOGGER.info("Second action invoked");
+    }
 }
