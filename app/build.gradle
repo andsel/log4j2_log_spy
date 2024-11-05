@@ -28,6 +28,7 @@ dependencies {
     // starting from version 2.20.0 commit https://github.com/apache/logging-log4j2/commit/d4a81ec0530a207b49931d0c92b34b58a3d91e8c
     // the test harness was separated into log4j-core-test from log4j-core and type tests
     testImplementation "org.apache.logging.log4j:log4j-core-test:${log4jVersion}" // from version 2.20.0
+    testImplementation 'org.assertj:assertj-core:3.26.3'
 
     // This dependency is used by the application.
     implementation libs.guava

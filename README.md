@@ -22,3 +22,9 @@ The class was also moved from `org.apache.logging.log4j.test.appender.ListAppend
 
 Check https://github.com/andsel/log4j2_log_spy/blob/85790eeb7f1987b4107be0e7e2ccf39fc6f82b79/app/src/test/java/mocklog4j/ServiceTest.java#L46-L64 
 for a test example.
+
+### Note on built-in configuration
+Every call to `Configurator.initialize(config here)` has to use a fresh instance of the `Configuration`, especially after
+a `context.close()` call. In close the all appender references is cleared, so it cut the link between the Appender and
+the context, plus if the configuration result already as STOPPED is not reinitialized, so it needs to be a fresh and unused 
+instance on each configurator initialization.

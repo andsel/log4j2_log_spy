@@ -2,6 +2,8 @@ package mocklog4j;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.impl.Log4jContextFactory;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ServiceTest {
 
@@ -82,5 +85,50 @@ class ServiceTest {
             String message = messages.iterator().next();
             assertTrue(message.contains("Second action invoked"));
         }
+    }
+
+    @Test
+    public void testLikeInLogstash() {
+        LogManager.setFactory(new Log4jContextFactory());
+        LoggerContext logCtx = Configurator.initialize(configuration);
+
+        Configuration config = logCtx.getConfiguration();
+        ListAppender appender = config.getAppender("LOG_SPY");
+        assertNotNull(appender, "Can't find logs spy appender");
+
+        // exercise
+        Service sut = new Service();
+        sut.secondAction();
+
+        // verify
+        List<String> messages = appender.getMessages();
+        assertNotNull(messages);
+        String message = messages.iterator().next();
+        assertThat(message).contains("Second action invoked");
+
+        logCtx.close(); // clean appenders controls
+
+        // second run
+        LogManager.setFactory(new Log4jContextFactory());
+        // IMPORTANT: create a fresh new configuration on each initialize call, because the config is not
+        // static, and on ctx.close is stopped, so on next reuse it won't start any Appender.
+        logCtx = Configurator.initialize(createConfiguration());
+
+        config = logCtx.getConfiguration();
+        appender = config.getAppender("LOG_SPY");
+        assertNotNull(appender, "Can't find logs spy appender");
+
+        // exercise
+        sut = new Service();
+        sut.action();
+
+        // verify
+        messages = appender.getMessages();
+        assertNotNull(messages);
+        assertEquals(1,  messages.size());
+        message = messages.iterator().next();
+        assertThat(message).contains("Action invoked");
+
+        logCtx.close();
     }
 }
