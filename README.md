@@ -3,7 +3,7 @@
 Log lines produced by applications are effectively output of the application itself, and time to time they need to be tested.
 This small project leverage the capabilities of Log4j2 to spy the log lines produced by a Service under test.
 
-### Idea
+### Idea 1 - use a programmatically built Log4j configuration
 The idea is to leverage Log4j ListAppender to capture the log lines produced and then verify that contains the expected messages.
 
 During the setup phase of the test a new Log$j Configuration is created programmatically, defining an appender (named `LOG_SPY`)
@@ -28,3 +28,18 @@ Every call to `Configurator.initialize(config here)` has to use a fresh instance
 a `context.close()` call. In close the all appender references is cleared, so it cut the link between the Appender and
 the context, plus if the configuration result already as STOPPED is not reinitialized, so it needs to be a fresh and unused 
 instance on each configurator initialization.
+
+### Idea 2 - add a customer appender to the Logger to collect the messages
+In this case the Log4j is not reconfigured but a custom spy appender is added the Logger used by the SUT:
+```java
+List<LogEvent> events = new ArrayList<>();
+Logger logger = (Logger) LogManager.getLogger(Service.class); // this has to be the logger we expect
+logger.addAppender(new CustomAppender(events));
+logger.setLevel(Level.INFO);
+
+// use SUT (Service) which uses the logger
+
+// examine the logged messages
+LogEvent event = events.iterator().next();
+assertEquals("Something expected", event.getMessage().getFormattedMessage());
+```

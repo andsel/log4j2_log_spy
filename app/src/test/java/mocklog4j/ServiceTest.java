@@ -1,10 +1,11 @@
 package mocklog4j;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.*;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.impl.Log4jContextFactory;
-import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
@@ -15,6 +16,8 @@ import org.apache.logging.log4j.core.test.appender.ListAppender; // from version
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -109,7 +112,7 @@ class ServiceTest {
         logCtx.close(); // clean appenders controls
 
         // second run
-        LogManager.setFactory(new Log4jContextFactory());
+//        LogManager.setFactory(new Log4jContextFactory());
         // IMPORTANT: create a fresh new configuration on each initialize call, because the config is not
         // static, and on ctx.close is stopped, so on next reuse it won't start any Appender.
         logCtx = Configurator.initialize(createConfiguration());
@@ -130,5 +133,37 @@ class ServiceTest {
         assertThat(message).contains("Action invoked");
 
         logCtx.close();
+    }
+
+    @Test
+    public void testAddingAnAppenderWithoutReinitializingContextWithConfigBuilder() {
+        List<LogEvent> events = new ArrayList<>();
+        Logger logger = (Logger) LogManager.getLogger(Service.class); // this has to be the logger we expect
+        logger.addAppender(new CustomAppender(events));
+        logger.setLevel(Level.INFO);
+
+        // Exercise
+        Service sut = new Service();
+        sut.action();
+
+        // Verify
+        assertEquals(1, events.size());
+        LogEvent event = events.iterator().next();
+        assertEquals("Action invoked", event.getMessage().getFormattedMessage());
+    }
+
+    static class CustomAppender extends AbstractAppender {
+
+        private final List<LogEvent> events;
+
+        public CustomAppender(List<LogEvent> events) {
+            super("CustomCaptorAppender", null, null, true, Property.EMPTY_ARRAY);
+            this.events = events;
+        }
+
+        @Override
+        public void append(LogEvent event) {
+            events.add(event);
+        }
     }
 }
