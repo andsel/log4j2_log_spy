@@ -43,3 +43,7 @@ logger.setLevel(Level.INFO);
 LogEvent event = events.iterator().next();
 assertEquals("Something expected", event.getMessage().getFormattedMessage());
 ```
+Be warned of a pair of things:
+- `logger.setLevel` has to be called **after** the `addAppender` else the logger set its level to error. 
+- appenders are cached by class name inside the Logger, so a second `addAppender` with another instance of same appender class, doesn't take effect. 
+  After each test is has to be cleared with `logger.removeAppender(appender)`.
